@@ -9,6 +9,14 @@ app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({ extended: true}));
 
 app.set('view engine', 'ejs');
+
+//conexao ao banco de dados uma vez ao inicio
+    conexao.connect(function(error){
+     if(error){
+        console.error("erro ao conectar ao banco de dados:", error);
+        process.exit(); //encerrar o servidor caso a conexao falhe
+     }
+    });
  
 app.get('/',function(req , res){
     res.sendFile(__dirname+ '/cadastro.html');
@@ -18,38 +26,31 @@ app.post('/', function(req, res){
     var nomecompleto = req.body.nomecompleto;
     var email = req.body.email;
     var senha = req.body.senha;
-
-    conexao.connect(function(error){
-     if(error) throw error;
-
+    
      //prevenindo SQL injection
      var sql = "INSERT INTO estudante(nomecompleto, email, senha) VALUES (?, ?, ?)";
      conexao.query(sql, [nomecompleto, email, senha], function(error, result){
         if(error) throw error;
-        res.send("estudante cadastro com sucesso!" + result.insertId);
+       // res.send("estudante cadastro com sucesso!" + result.insertId);
      
-       
-
-    
-
+       res.redirect('/estudantes');
      });
     
 });
-});
+
 
 // leitura do banco de dados
-app.get('/estudante', function(req, res){
-    conexao.connect(function(error){
-        if(error) console.log(error);
-
+app.get('/estudantes', function(req, res){
+   
         var sql = "select * from estudante";
         conexao.query(sql, function(error, result){
             if(error) console.log(error);
-            console.log(result);
+         //   console.log(result);
+         res.render(__dirname+"/estudantes", {estudante:result});
         });
 
     });
-});
+
 
 app.listen(7000);
 

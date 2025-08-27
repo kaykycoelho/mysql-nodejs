@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    
+    <title>lista de estudantes</title>
+</head>
+<body>
+    <h1>lista de estudantes</h1>
+    <table border="1"  width="100%">
+    <tr>
+        <th>codigo</th>
+        <th>nome</th>
+        <th>e-mail</th>
+    </tr>
+
+    <% if(estudante.length > 0 ) { %>
+<% for (var i = 0; i < estudante.length; i++) { %>
+ <tr>
+    <td><%-estudante[i].id %></td>
+    <td><%-estudante[i].nomecompleto %></td>
+    <td><%-estudante[i].email %></td>
+ </tr>
+
+    <% } %>
+   <% } else { %>
+        <h1>NÃO temos estudantes no banco de dados</h1>
+        <% } %>
+
+
+    </table>
+</body>
+</html>
