@@ -1,16 +1,23 @@
+var express = require('express');
+var bodyParser = require('body-parser');
+var methodOverride = require( 'method-override');
 var conexao = require ("./conexaoBanco");
 
-var express = require('express');
+
 
 var app = express();
- 
-var bodyParser = require('body-parser');
+
+
+
  
 app.use(bodyParser.json());
  
 app.use(bodyParser.urlencoded({ extended: true }));
  
+app.use(methodOverride('_method'));
+
 app.set('view engine', 'ejs');
+app.set('views',__dirname + '/views');
  
  
 //Conexão ao banco de dados uma vez no início
@@ -72,7 +79,7 @@ app.get('/estudantes', function(req, res){
 
        // console.log(result);
 
-       res.render(__dirname+"/estudantes", {estudante:result});
+       res.render('estudantes', {estudante:result});
 
         });
 
@@ -81,63 +88,41 @@ app.get('/estudantes', function(req, res){
  
 //Rota de Delete
 
-app.get('/delete-estudante', function(req, res){
- 
-  var sql = "delete from estudante where id=?";
- 
-  var id = req.query.id;
- 
-  conexao.query(sql, [id], function(error, result){
+app.delete('/delete-estudante', function(req, res){
+const id = req.body.id;
 
-        if(error) console.log(error);
- 
-        res.redirect('/estudantes');
- 
-  });
-
+conexao.query('DELETE FROM estudante WHERE id = ?', [id], (err) => {
+if(err) {
+  console.error(err);
+  return res.status(500).send('erro ao deletar estudante');
+}
+res.redirect('/estudantes');
+});
 });
  
 //Rota update
 
 app.get('/update-estudante', function(req, res){
- 
-   var sql = "select * from estudante where id=?";
- 
-   var id = req.query.id;
- 
-   conexao.query(sql, [id], function(error, result){
+ const id = req.query.id;
 
-        if(error) console.log(error);
- 
-        res.render(__dirname+'/alterarestudantes', {estudante:result});
 
-   });
+ conexao.query('SELECT * FROM estudante WHERE id = ?', [id], (err, result) => {
+  if (err) return res.status(500).send('erro ao buscar estudante');
+  res.render('alterarestudantes', { estudante: result[0] });
+ });
+  
 
 });
  
-app.post('/update-estudante', function(req, res){
+app.put('/update-estudante', function(req, res){
+  const {id, nomecompleto, email, senha} = req.body;
 
-     var nomecompleto = req.body.nomecompleto;
-
-     var email = req.body.email;
-
-     var senha = req.body.senha;
-
-     var id = req.body.id;
- 
-     var sql = "UPDATE estudante set nomecompleto=?, email=?, senha=? where id=?";
- 
-     var id = req.query.id;
- 
-     conexao.query(sql, [nomecompleto, email, senha, id], function(error, result){
-
-        if(error) console.log(error);
-
-        res.render(__dirname+'/alterarestudantes', {estudante:result});
-
-        res.redirect('/estudantes');
-
-     });
+  conexao.query('UPDATE estudante SET nomecompleto=?, email=?, senha=? WHERE id=?',
+    [nomecompleto,email,senha,id], (err) => {
+     if (err) return res.status(500).send('erro ao atulizar estudante');
+     res.redirect('/estudantes');
+    }
+  );
 
 });
  
